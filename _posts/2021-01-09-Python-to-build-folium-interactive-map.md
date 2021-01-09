@@ -13,7 +13,7 @@ My objective was to produce a map that displayed:
 *Choropleth and boundary overlays
 *A Local Authority search tool
 
-[Folium documentation] (https://python-visualization.github.io/folium/modules.html) and [Folium Plugins documentation] (https://python-visualization.github.io/folium/plugins.html) is your best friend here. There are so many more features available in Folium than are shown here! Below I’ll show you the seven steps and code that I used to build my map. 
+[Folium documentation](https://python-visualization.github.io/folium/modules.html) and [Folium Plugins documentation](https://python-visualization.github.io/folium/plugins.html) is your best friend here. There are so many more features available in Folium than are shown here! Below I’ll show you the seven steps and code that I used to build my map. 
 ##Step 1: Import Libraries 
 
 ```python
