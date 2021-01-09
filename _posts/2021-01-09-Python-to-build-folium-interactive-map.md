@@ -1,6 +1,8 @@
 ---
-title: >-
-    Using Python to Build an Interactive Income Map of the UK
+layout: post
+title: "Building an Interactive UK Income Map"
+date: 2021-01-09 16:10:00 -0000
+categories: Python Folium
 ---
 
 ## Project Background
