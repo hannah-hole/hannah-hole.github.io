@@ -4,9 +4,23 @@ title: "Building an Interactive UK Income Map"
 date: 2021-01-09 16:10:00 -0000
 categories: Python Folium
 ---
+## Contents
+* [Project Background](#background)
+* [Output](#output)
+* Process
+	* [Step 1: Import Libraries](#step1) 
+	* [Step 2: Download data required](#step2)
+	* [Step 3: Merge the datasets and split the Local Authorities into income deciles](#step3)
+	* [Step 4: Create our base Folium map and decile marker layers](#step4)
+	* [Step 5: Create the boundary overlay](#step5)
+	* [Step 6: Create the search functionality](#step6)
+	* [Step 7: Create the Choropleth layer](#step7)
+	* [Step 8: Save and open your map](#step8)
+* [Final Code](#finalcode)
+* [Remarks](#remarks)
 
-## Project Background
- In this post I am going to show you how I built a Choropleth map using Folium for my first semester Python class. I love storytelling with data visualization, so I decided to look at using Python’s data visualization capabilities to display open source UK income data in a way that was interactive and easy to understand. 
+## Project Background <a name="background"></a>
+In this post I am going to show you how I built a Choropleth map using Folium for my first semester Python class. I love storytelling with data visualization, so I decided to look at using Python’s data visualization capabilities to display open source UK income data in a way that was interactive and easy to understand. 
 I quickly discovered that Gross Disposable Household Income (GDHI) data by UK Local Authority was the most granular data publicly available, and that the Folium library/package would be the best way to approach this project. 
 My objective was to produce a map that displayed:
 
@@ -15,8 +29,12 @@ My objective was to produce a map that displayed:
 * Choropleth and boundary overlays
 * A Local Authority search tool
 
-[Folium documentation](https://python-visualization.github.io/folium/modules.html) and [Folium Plugins documentation](https://python-visualization.github.io/folium/plugins.html) are your best friends - there are so many more features available in Folium than are shown here! Below I’ll show you the seven steps and code that I used to build my map. 
-# Step 1: Import Libraries 
+[Folium documentation](https://python-visualization.github.io/folium/modules.html) and [Folium Plugins documentation](https://python-visualization.github.io/folium/plugins.html) are your best friends - there are so many more features available in Folium than are shown here! Below you can see the output that we'll create, and I’ll show you the eight steps and code that I followed. 
+
+## Output <a name="output"></a>
+<iframe src="/assets/folium_map.html" height="600" width="1000"></iframe>
+
+# Step 1: Import Libraries <a name="step1"></a>
 
 ```python
 import pandas as pd 
@@ -27,7 +45,7 @@ from folium.plugins import MarkerCluster
 import wget 
 import webbrowser
 ```
-# Step 2: Download data required
+# Step 2: Download data required <a name="step2"></a>
 All the data required is available online from the Office for National Statistics (ONS), the nationally recognized institute that produces [official statistics in the UK](https://www.ons.gov.uk/). 
 We will need three files:
 * Co-ordinates to place the Local Authority markers on the map, available in *csv format, with 2019 the most recent available. [ONS Geography Portal](https://geoportal.statistics.gov.uk/datasets/local-authority-districts-december-2019-boundaries-uk-bfe-1/data) or [download file](https://opendata.arcgis.com/datasets/b3e3278842b6482ea53fb6314f52bbeb_0.csv?outSR=%7B%22latestWkid%22%3A27700%2C%22wkid%22%3A27700%7D). 
@@ -58,7 +76,7 @@ for j in region_list:
     income_data_region.columns = income_data_region.columns.astype(str) #convert all columns names to strings which will cause less formatting issues when joining
     income_data = pd.concat([income_data, income_data_region]) #add datasets together
 ```
-# Step 3: Merge the datasets and split the Local Authorities into income deciles
+# Step 3: Merge the datasets and split the Local Authorities into income deciles <a name="step3"></a>
 We merge the co-ordinates data with the income data so we work with just one data set throughout the rest of the steps. We will join the income and co-ordinates data by Local Authority Code. We also need to clean the data a bit.   
 
 ```python
@@ -69,7 +87,7 @@ income_coordinates_data['Decile']=pd.qcut(income_coordinates_data['Y2018'],q=10,
 ```
 If you want to understand how qcut works, this table shows us that our Local Authorities have been divided into 10 (roughly) equal groups, where 'Lowest Decile' gives us the bottom 10% of Local Authorities by Gross Disposable Household Income:     
 
-# Step 4: Create our base Folium map and decile marker layers
+# Step 4: Create our base Folium map and decile marker layers <a name="step4"></a>
 This step allows us to filter Local Authorities by deciles on our map, using the column 'Decile' that we created above. To create controllable layers in Folium, you have to use the FeatureGroup *. The code loops through the 10 groups that we created in Step 2, and creates a detailed marker for each Local Authority and groups these together as a layer. 
 I also used *MarkerCluster here as the map gets overcrowded with markers really quick, making it nearly impossible to see the underlying map! 
 
@@ -87,7 +105,7 @@ for grp_name, df_grp in income_coordinates_data.groupby('Decile'):
       ).add_to(feature_group).add_to(marker_cluster)
     feature_group.add_to(folium_map) 
 ```
-# Step 5: Create the boundary overlay
+# Step 5: Create the boundary overlay <a name="step5"></a>
 This is more of a nice to have than a necessity. 
 
 If you decide you don’t want to see the Choropleth overlay, but still want to see the boundary outlines of the Local Authorities then this overlay does just that.  
@@ -102,7 +120,7 @@ geojson_obj=folium.GeoJson(
 ).add_to(folium_map) #create an object to be used in the search tool
 
 ```
-# Step 6: Create the search functionality 
+# Step 6: Create the search functionality <a name="step6"></a>
 This is probably my favourite functionality of the map! 
 
 This makes it super easy to search for any Local Authority. For example, as you type in the search bar for ‘Manchester’, it lists suggestions such as ‘Mansfield’. It then zooms in on Manchester, just like Google Maps. The only downside is that if you want to see the information marker for Manchester, the decile that it is in must be ticked on the control pane
@@ -115,7 +133,7 @@ folium.plugins.Search(
     position='topright'
 ).add_to(folium_map)
 ```
-# Step 7: Create the Choropleth layer 
+# Step 7: Create the Choropleth layer <a name="step7"></a>
 This is where the magic happens! The Choropleth plugin* Will fill the Local Authority with a colour based on its GDHI value, where a darker colour indicates higher GDHI and vice versa, allowing us to spot instantly which Local Authorities have the highest or lowest GDHI.  
 The default number of colours on the legend is 5, but I’ve increased it to 9 to get a wide spread of colours.
 ```python
@@ -136,17 +154,17 @@ folium.Choropleth(
 
 folium.LayerControl(collapsed=False).add_to(folium_map)#create a panel that allows the user to select between layers
 ```
-# Step 8: Save and open your map 
+# Step 8: Save and open your map <a name="step8"></a>
 The map is saved in HTML format, and will open automatically on your default browser. Voilà!
 ```python
 folium_map.save('folium_map.html') #save as HTML
 webbrowser.open('folium_map.html') #open HTML
 ```
-## Final Code
-Can be found at my [GitHub]()
-```
-## Output
+## Final Code <a name="finalcode"></a>
+Can be found at my [GitHub Repository]()
 
-## Remarks
-As a first time Python developer*, I was very impressed at Python’s data wrangling and data visualization capabilities. I was amazed at the powerful infographic?s you can achieve with without paying for proprietary data visualization software or closed source data! I hope this helps if you are looking to produce a similar map. Feel free to contact me if you are looking for someone to build something similar for your business.    
+## Remarks <a name="remarks"></a>
+As a first time Python developer*, I was very impressed at Python’s data wrangling and data visualization capabilities. I was amazed at the powerful infographic?s you can achieve with without paying for proprietary data visualization software and only using open data! I hope this helps if you are looking to produce a similar map. 
+
+Feel free to contact me if you are looking for someone to build something similar for your business.    
 
