@@ -35,6 +35,17 @@ theme: minima
 plugins:
   - jekyll-feed
 
+# Site Author
+author:
+  name             : "Hannah Ho-Le"
+  avatar           : "/images/image.PNG" # path of avatar image, e.g. "/assets/images/bio-photo.jpg"
+  bio              : "Student"
+  location         : "Paris, France"
+  email            :
+  uri              :
+  home             : # null (default), "absolute or relative url to link to author home"
+  bitbucket        :
+
 # Exclude from processing.
 # The following items will not be processed, by default.
 # Any item listed under the `exclude:` key here will be automatically added to
